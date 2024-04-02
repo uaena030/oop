@@ -1,6 +1,7 @@
 #include <iostream>
 #include <vector>
 #include <utility>
+#include <map>
 using namespace std;
 
 
@@ -36,7 +37,9 @@ int main(){
     for(int i = 1; i <= precedence; i++){//precedence input
         int current, next, trash;
         cin >> trash >> current >> next;
-        mygate[current].precedence.push_back(next); 
+        mygate[current].precedence.push_back(next);
+        map<vector<gate>, vector<gate>> precedencelist;
+        precedencelist.insert(pair<vector<gate>, vector<gate>(mygate[current], mygate[next]));
     }
     for(int i = 1; i <= phyLinks; i++){//physical links input
         int p1, p2, trash;
