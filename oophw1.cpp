@@ -105,11 +105,17 @@ int main(){
         mygate[current].precedence.push_back(next);
         preIDlist[trash] = current;
     }
+    int **clink = new int *[phyQubits + 1];
+    for (int k = 0; k < phyQubits + 1; ++k){
+        clink[k] = new int[phyQubits + 1];
+    }
     for(int i = 1; i <= phyLinks; i++){//physical links input
         int p1, p2, trash;
         cin >> trash >> p1 >> p2;
         myPQB[p1].pneighbor.push_back(p2);
         myPQB[p2].pneighbor.push_back(p1);
+        clink[p1][p2] = true;
+        clink[p2][p1] = true;
     }
     //baseline assume that logqubits equal to phyqubits
     for(int i = 1; i <= myPQB.size(); i++){
@@ -139,21 +145,6 @@ int main(){
                 //bfs(using pneighbor)
                 int initial = mygate[preIDlist[i]].gatemember[0];
                 int end = mygate[preIDlist[i]].gatemember[1];
-                int **clink = new int *[phyQubits];
-                for (int k = 0; k < phyQubits; ++k)
-                {
-                    clink[k] = new int[phyQubits];
-                }
-                for(int cpylink = 0; cpylink < myPQB.size(); cpylink++){
-                    if(myPQB[cpylink].pneighbor.empty()){
-                        break;
-                    }
-                    else{
-                        for(int cpydlink = 0; cpydlink < myPQB[cpylink].pneighbor.size(); cpydlink++){
-                            clink[cpylink][myPQB[cpylink].pneighbor[cpydlink]] = true;
-                        }
-                    }
-                }
                 int* result = BFS(initial, end, clink, phyQubits);
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
@@ -166,7 +157,7 @@ int main(){
                 result[1] = tempend;
                 cout << "SWAP q" << result[0] << " q" << result[1] << endl;
                 // remapping logical qubits
-                for(int remapp = 0; remapp < step; remapp++){
+                for(int remapp = 0; remapp < step; remapp++){//bug discovered
                     myLQB[coresult[remapp]].PQBID = result[remapp];
                 }
             //}
