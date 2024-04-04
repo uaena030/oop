@@ -118,7 +118,7 @@ int main(){
     }
     //output initial map
     for(int i = 1; i <= myPQB.size(); i++){
-        cout << i << " " << myPQB[i].LQBID;
+        cout << i << " " << myPQB[i].LQBID << endl;
     }
     //precedence judge
     int nowloop = 1;
