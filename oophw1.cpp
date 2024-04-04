@@ -4,6 +4,7 @@
 #include <map>
 using namespace std;
 
+int step;
 
 class PQB{
     public:
@@ -21,6 +22,68 @@ class gate{
     vector<int> precedence;
     int gatemember[2];
 };
+
+typedef struct node{
+    int x;
+    int y;
+} node;
+
+int *BFS(int src, int end, vector<PQB>& thepqb,int size)
+{ // 1 0
+    node queue[size * size + 1];
+    int head = 0, tail = 1;
+    queue[0].x = src;
+    queue[0].y = src; //(src, src) is starting point
+    int node_x, node_y;
+    int visited[size], ancient[6000];
+    for (int i = 0; i < size; i++)
+    {
+        visited[i] = false;
+    }
+    visited[src] = true;
+    // bfs
+    while (head != tail)
+    {
+        node_x = queue[head].x;
+        node_y = queue[head].y;
+        if (node_x == end && node_y == end)
+        {
+            break;
+        }
+        for (int i = 0; i < size; i++)
+        {
+            if (thepqb[node_y].pneighbor[i] == i && visited[i] == false){
+                ancient[i] = node_y;
+                queue[tail].x = node_y; // 0 1
+                queue[tail].y = i;      // 1
+                visited[i] = true;
+                tail++;
+            }
+        }
+        head++;
+    }
+    // generate route
+    int rroute[6000];
+    for (int i = 0; i < 6000; i++)
+    {
+        rroute[i] = -1;
+    }
+    int i = end, j = 0;
+    while (i != src)
+    {
+        rroute[j] = i;
+        j++;
+        i = ancient[i];
+    }
+    rroute[j] = i;
+    int *route = new int[6000];
+    for (int i = 0; i < j + 1; i++)
+    {
+        route[i] = rroute[j - i];
+    }
+    step = j + 1;
+    return route;
+}
 
 int main(){
     vector<LQB> myLQB;
@@ -57,7 +120,7 @@ int main(){
     int nowloop = 1;
     while(nowloop != (precedence + 1)){
         int Isnei = 0, i = myLQB[nowloop].PQBID;
-        for (int j = 0; j < myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
+        for (int j = 1; j <= myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
                 if (myPQB[mygate[preIDlist[i]].gatemember [0]].pneighbor[j] == mygate[preIDlist[i]].gatemember[1]){
                     Isnei = 1;
                     nowloop++;
@@ -68,14 +131,12 @@ int main(){
 
         //can't do cnot, swap
         if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
-            for(int swaploop = 1; swaploop <= myLQB.size(); swaploop++){
-                if(){//can swap(swap logical qubit)
-                    //bfs
-                }
-            }
-            else{//can't swap && can't cnot
-
-            }
+            //for(int swaploop = 1; swaploop <= myLQB.size(); swaploop++){
+                //bfs(using pneighbor)
+                int initial = mygate[preIDlist[i]].gatemember[0];
+                int end = mygate[preIDlist[i]].gatemember[1];
+                int* result = BFS(initial, end, myPQB, phyQubits);
+            //}
         }
     }
 
