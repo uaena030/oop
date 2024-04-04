@@ -129,7 +129,7 @@ int main(){
     //precedence judge
     int nowloop = 1;
     while(nowloop != (precedence + 1)){
-        int Isnei = 0, i = myLQB[nowloop].PQBID;
+        int Isnei = 0, i = myLQB[nowloop].PQBID;//bug here
         for (int j = 0; j < myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
                 if (myPQB[mygate[preIDlist[i]].gatemember [0]].pneighbor[j] == mygate[preIDlist[i]].gatemember[1]){
                     Isnei = 1;
@@ -157,7 +157,7 @@ int main(){
                 result[1] = tempend;
                 cout << "SWAP q" << result[0] << " q" << result[1] << endl;
                 // remapping logical qubits
-                for(int remapp = 0; remapp < step; remapp++){//bug discovered
+                for(int remapp = 0; remapp < step; remapp++){
                     myLQB[coresult[remapp]].PQBID = result[remapp];
                 }
             //}
