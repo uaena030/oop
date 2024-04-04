@@ -117,14 +117,14 @@ int main(){
         myPQB[i].LQBID = i;
     }
     //output initial map
-    for(int i = 1; i <= myPQB.size(); i++){
+    for(int i = 1; i < myPQB.size(); i++){
         cout << i << " " << myPQB[i].LQBID << endl;
     }
     //precedence judge
     int nowloop = 1;
     while(nowloop != (precedence + 1)){
         int Isnei = 0, i = myLQB[nowloop].PQBID;
-        for (int j = 1; j <= myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
+        for (int j = 0; j < myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
                 if (myPQB[mygate[preIDlist[i]].gatemember [0]].pneighbor[j] == mygate[preIDlist[i]].gatemember[1]){
                     Isnei = 1;
                     nowloop++;
@@ -157,6 +157,4 @@ int main(){
             //}
         }
     }
-
-    
 }
