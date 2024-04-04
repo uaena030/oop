@@ -28,7 +28,7 @@ typedef struct node{
     int y;
 } node;
 
-int *BFS(int src, int end, vector<PQB>& thepqb,int size)
+int *BFS(int src, int end, int **maze, int size)
 { // 1 0
     node queue[size * size + 1];
     int head = 0, tail = 1;
@@ -52,7 +52,7 @@ int *BFS(int src, int end, vector<PQB>& thepqb,int size)
         }
         for (int i = 0; i < size; i++)
         {
-            if (thepqb[node_y].pneighbor[i] == i && visited[i] == false){
+            if (maze[node_y][i] == 1 && visited[i] == false){//bug appear
                 ancient[i] = node_y;
                 queue[tail].x = node_y; // 0 1
                 queue[tail].y = i;      // 1
@@ -139,7 +139,22 @@ int main(){
                 //bfs(using pneighbor)
                 int initial = mygate[preIDlist[i]].gatemember[0];
                 int end = mygate[preIDlist[i]].gatemember[1];
-                int* result = BFS(initial, end, myPQB, phyQubits);
+                int **clink = new int *[phyQubits];
+                for (int k = 0; k < phyQubits; ++k)
+                {
+                    clink[k] = new int[phyQubits];
+                }
+                for(int cpylink = 0; cpylink < myPQB.size(); cpylink++){
+                    if(myPQB[cpylink].pneighbor.empty()){
+                        break;
+                    }
+                    else{
+                        for(int cpydlink = 0; cpydlink < myPQB[cpylink].pneighbor.size(); cpydlink++){
+                            clink[cpylink][myPQB[cpylink].pneighbor[cpydlink]] = true;
+                        }
+                    }
+                }
+                int* result = BFS(initial, end, clink, phyQubits);
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
                     coresult[copy] = result[copy];
