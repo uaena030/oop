@@ -116,6 +116,10 @@ int main(){
         myLQB[i].PQBID = i;
         myPQB[i].LQBID = i;
     }
+    //output initial map
+    for(int i = 1; i <= myPQB.size(); i++){
+        cout << i << " " << myPQB[i].LQBID;
+    }
     //precedence judge
     int nowloop = 1;
     while(nowloop != (precedence + 1)){
@@ -136,13 +140,23 @@ int main(){
                 int initial = mygate[preIDlist[i]].gatemember[0];
                 int end = mygate[preIDlist[i]].gatemember[1];
                 int* result = BFS(initial, end, myPQB, phyQubits);
+                int coresult[step];
+                for(int copy = 0; copy < step; copy++){
+                    coresult[copy] = result[copy];
+                }
+                int tempend = result[step - 1];
+                for(int changepath = 1; changepath < step - 1; changepath++){
+                    result[changepath + 1] = result[changepath];
+                }
+                result[1] = tempend;
+                cout << "SWAP q" << result[0] << " q" << result[1] << endl;
+                // remapping logical qubits
+                for(int remapp = 0; remapp < step; remapp++){
+                    myLQB[coresult[remapp]].PQBID = result[remapp];
+                }
             //}
         }
     }
 
-    //output
-    for(int i = 1; i <= myPQB.size(); i++){
-        cout << i << " " << myPQB[i].LQBID;
-    }
     
 }
