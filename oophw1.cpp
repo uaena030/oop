@@ -7,6 +7,7 @@ using namespace std;
 
 class PQB{
     public:
+    int LQBID;//initial mapping, will not changed
     vector<int> pneighbor;
 };
 
@@ -50,24 +51,27 @@ int main(){
     //baseline assume that logqubits equal to phyqubits
     for(int i = 1; i <= myPQB.size(); i++){
         myLQB[i].PQBID = i;
+        myPQB[i].LQBID = i;
     }
     //precedence judge
     int nowloop = 1;
     while(nowloop != (precedence + 1)){
-        int Isnei = 0;
-        for (int j = 0; j < myPQB [mygate[preIDlist[nowloop]].gatemember [0]].pneighbor.size(); j++){//can do cnot
-                if (myPQB[mygate[preIDlist[nowloop]].gatemember [0]].pneighbor[j] == mygate[preIDlist[nowloop]].gatemember[1]){
+        int Isnei = 0, i = myLQB[nowloop].PQBID;
+        for (int j = 0; j < myPQB [mygate[preIDlist[i]].gatemember [0]].pneighbor.size(); j++){//can do cnot
+                if (myPQB[mygate[preIDlist[i]].gatemember [0]].pneighbor[j] == mygate[preIDlist[i]].gatemember[1]){
                     Isnei = 1;
                     nowloop++;
-                    cout << "CNOT q" << mygate[preIDlist[nowloop]].gatemember[0] << " q" << mygate[preIDlist[nowloop]].gatemember[1] << endl;
+                    cout << "CNOT q" << mygate[preIDlist[i]].gatemember[0] << " q" << mygate[preIDlist[i]].gatemember[1] << endl;
                     break;
                 }
         }
 
         //can't do cnot, swap
         if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
-            if(){//can swap(swap logical qubit)
-                //bfs
+            for(int swaploop = 1; swaploop <= myLQB.size(); swaploop++){
+                if(){//can swap(swap logical qubit)
+                    //bfs
+                }
             }
             else{//can't swap && can't cnot
 
