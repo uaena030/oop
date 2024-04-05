@@ -19,7 +19,6 @@ class LQB{//can be swapped
 
 class gate{
     public:
-    vector<int> precedence;
     int gatemember[2];
 };
 
@@ -91,7 +90,7 @@ int main(){
     vector<PQB> myPQB;
     int logQubits, gates, precedence, phyQubits, phyLinks;
     cin >> logQubits >> gates >> precedence >> phyQubits >> phyLinks;
-    int preIDlist[precedence + 1];
+    int preIDlist[precedence + 2];
     myLQB.resize(logQubits + 1);
     mygate.resize(gates + 1);
     myPQB.resize(phyQubits + 1);
@@ -102,8 +101,10 @@ int main(){
     for(int i = 1; i <= precedence; i++){//precedence input
         int current, next, trash;
         cin >> trash >> current >> next;
-        mygate[current].precedence.push_back(next);
         preIDlist[trash] = current;
+        if(i == precedence){
+            preIDlist[trash + 1] = next;
+        }
     }
     int **clink = new int *[phyQubits + 1];
     for (int k = 0; k < phyQubits + 1; ++k){
@@ -133,12 +134,12 @@ int main(){
     }
     //precedence judge
     int nowloop = 1;
-    while(nowloop != (precedence + 1)){
+    while(nowloop != (precedence + 2)){
         int Isnei = 0;//bug here
-        for (int j = 0; j < myPQB[myLQB[mygate[preIDlist[nowloop]].gatemember [0]].PQBID].pneighbor.size(); j++){//can do cnot
-                if (myLQB[myPQB[myLQB[mygate[preIDlist[nowloop]].gatemember [0]].PQBID].pneighbor[j]].PQBID == mygate[preIDlist[nowloop]].gatemember[1]){
+        for (int j = 0; j < myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor.size(); j++){//can do cnot
+                if (myLQB[myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor[j]].PQBID == mygate[nowloop].gatemember[1]){
                     Isnei = 1;
-                    cout << "CNOT q" << myLQB[mygate[preIDlist[nowloop]].gatemember[0]].PQBID << " q" << mygate[preIDlist[nowloop]].gatemember[1] << endl;
+                    cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
                     nowloop++;
                     break;
                 }
@@ -148,8 +149,8 @@ int main(){
         if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
             //for(int swaploop = 1; swaploop <= myLQB.size(); swaploop++){
                 //bfs(using pneighbor)
-                int initial = myLQB[mygate[preIDlist[nowloop]].gatemember[0]].PQBID;
-                int end = myLQB[mygate[preIDlist[nowloop]].gatemember[1]].PQBID;
+                int initial = myLQB[mygate[nowloop].gatemember[0]].PQBID;
+                int end = myLQB[mygate[nowloop].gatemember[1]].PQBID;
                 int* result = BFS(initial, end, clink, (phyQubits + 1));//bug
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
@@ -160,12 +161,16 @@ int main(){
                     result[changepath + 1] = result[changepath];
                 }
                 result[1] = tempend;
-                cout << "SWAP q" << coresult[1] << " q" << coresult[step - 1] << endl;
+                cout << "SWAP q" << myLQB[coresult[1]].PQBID << " q" << myLQB[coresult[step - 1]].PQBID << endl;
                 // remapping logical qubits
-                for(int remapp = 0; remapp < step; remapp++){
+                for(int remapp = 1; remapp < step; remapp++){
                     myLQB[coresult[remapp]].PQBID = result[remapp];
                 }//build a new link map
             //}
+            if(nowloop == (precedence + 1)){
+                cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
+                return 0;
+            }
         }
     }
 }

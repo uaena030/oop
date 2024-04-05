@@ -1,0 +1,24 @@
+1 1
+2 2
+3 3
+4 4
+5 5
+6 6
+7 7
+8 8
+9 9
+10 10
+CNOT q4 q6
+CNOT q4 q1
+SWAP q2 q9
+CNOT q6 q2
+SWAP q10 q7
+CNOT q9 q10
+CNOT q8 q3
+CNOT q4 q7
+SWAP q2 q10
+CNOT q4 q2
+SWAP q9 q10
+CNOT q6 q9
+CNOT q8 q10
+CNOT q4 q10
