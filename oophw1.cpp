@@ -101,10 +101,6 @@ int main(){
     for(int i = 1; i <= precedence; i++){//precedence input
         int current, next, trash;
         cin >> trash >> current >> next;
-        preIDlist[trash] = current;
-        if(i == precedence){
-            preIDlist[trash + 1] = next;
-        }
     }
     int **clink = new int *[phyQubits + 1];
     for (int k = 0; k < phyQubits + 1; ++k){
@@ -134,7 +130,7 @@ int main(){
     }
     //precedence judge
     int nowloop = 1;
-    while(nowloop != (precedence + 2)){
+    while(nowloop != gates + 1){
         int Isnei = 0;//bug here
         for (int j = 0; j < myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor.size(); j++){//can do cnot
                 if (myLQB[myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor[j]].PQBID == mygate[nowloop].gatemember[1]){
@@ -147,7 +143,6 @@ int main(){
 
         //can't do cnot, swap
         if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
-            //for(int swaploop = 1; swaploop <= myLQB.size(); swaploop++){
                 //bfs(using pneighbor)
                 int initial = myLQB[mygate[nowloop].gatemember[0]].PQBID;
                 int end = myLQB[mygate[nowloop].gatemember[1]].PQBID;
@@ -156,18 +151,17 @@ int main(){
                 for(int copy = 0; copy < step; copy++){
                     coresult[copy] = result[copy];
                 }
+                //swap path point
                 int tempend = result[step - 1];
-                for(int changepath = 1; changepath < step - 1; changepath++){
-                    result[changepath + 1] = result[changepath];
-                }
-                result[1] = tempend;
-                cout << "SWAP q" << myLQB[coresult[1]].PQBID << " q" << myLQB[coresult[step - 1]].PQBID << endl;
+                result[step - 1] = result[step - 2];
+                result[step - 2] = tempend;
+                cout << "SWAP q" << coresult[step - 2] << " q" << coresult[step - 1] << endl;
                 // remapping logical qubits
-                for(int remapp = 1; remapp < step; remapp++){
-                    myLQB[coresult[remapp]].PQBID = result[remapp];
-                }//build a new link map
+                int tempQB = myLQB[coresult[step - 1]].PQBID;
+                myLQB[coresult[step - 1]].PQBID = myLQB[coresult[step - 2]].PQBID;
+                myLQB[coresult[step - 2]].PQBID = tempQB;
             //}
-            if(nowloop == (precedence + 1)){
+            if(nowloop == gates){
                 cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
                 return 0;
             }
