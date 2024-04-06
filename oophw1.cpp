@@ -144,8 +144,8 @@ int main(){
         }
 
         //can't do cnot, swap
-        if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
-                //bfs(using pneighbor)
+        if(Isnei == 0){
+                //bfs(using gatemember)
                 int* result = BFS(forwardB, backwardB, clink, (phyQubits + 1));//bug
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
@@ -155,11 +155,18 @@ int main(){
                 int tempend = result[step - 1];
                 result[step - 1] = result[step - 2];
                 result[step - 2] = tempend;
-                cout << "SWAP q" << myLQB[coresult[step - 2]].PQBID << " q" << myLQB[coresult[step - 1]].PQBID << endl;
+                //find who is now at coreresult[step - 1] and coreresult[step - 2]
+                int swA, swB;
+                for(int hard = 1; hard <= logQubits; hard++){
+                    if(myLQB[hard].PQBID == coresult[step - 1]){
+                        swA = hard;
+                    }
+                    else if(myLQB[hard].PQBID == coresult[step - 2]){
+                        swB = hard;
+                    }
+                }
+                cout << "SWAP q" << swA << " q" << swB << endl;
                 // remapping logical qubits
-                //bug here
-                int swA = myLQB[coresult[step - 1]].PQBID;
-                int swB = myLQB[coresult[step - 2]].PQBID;
                 int tempQB = myLQB[swA].PQBID;
                 myLQB[swA].PQBID = myLQB[swB].PQBID;
                 myLQB[swB].PQBID = tempQB;
