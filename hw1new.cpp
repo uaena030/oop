@@ -37,6 +37,7 @@ int *BFS(int src, int end, const vector<PQB> maze, int size){
     // bfs
     while (!path.empty()){
         int node = path.front();
+        path.pop();
         if (node == end){
             break;
         }
@@ -84,22 +85,11 @@ int main(){
         cin >> trash >> current >> next;
     }
     //initialize link map
-    int **clink = new int *[phyQubits + 1];
-    for (int k = 0; k < phyQubits + 1; ++k){
-        clink[k] = new int[phyQubits + 1];
-    }
-    for(int i = 0; i < phyQubits + 1; i++){
-        for(int j = 0 ; j < phyQubits + 1; j++){
-            clink[i][j] = false;
-        }
-    }
     for(int i = 1; i <= phyLinks; i++){//physical links input
         int p1, p2, trash;
         cin >> trash >> p1 >> p2;
         myPQB[p1].pneighbor.push_back(p2);
         myPQB[p2].pneighbor.push_back(p1);
-        clink[p1][p2] = true;
-        clink[p2][p1] = true;
     }
     //baseline assume that logqubits equal to phyqubits
     for(int i = 1; i <= myPQB.size(); i++){
