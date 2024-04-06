@@ -91,7 +91,7 @@ int main(){
     }
     //output initial map
     for(int i = 1; i < myPQB.size(); i++){
-        cout << i << " " << i << endl;
+        cout << i << " " << i << '\n';
     }
     //precedence judge
     int nowloop = 1;
@@ -103,7 +103,7 @@ int main(){
         for (int j = 0; j < myPQB[forwardB].pneighbor.size(); j++){//can do cnot
                 if (myPQB[forwardB].pneighbor[j] == backwardB){
                     Isnei = 1;
-                    cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
+                    cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << '\n';
                     nowloop++;
                     break;
                 }
@@ -138,7 +138,7 @@ int main(){
                             complete++;
                         }
                     }
-                    cout << "SWAP q" << swA << " q" << swB << endl;
+                    cout << "SWAP q" << swA << " q" << swB << '\n';
                     // remapping logical qubits
                     int tempQB = myLQB[swA].PQBID;
                     myLQB[swA].PQBID = myLQB[swB].PQBID;
