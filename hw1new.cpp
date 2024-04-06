@@ -20,11 +20,6 @@ class gate{
     int gatemember[2];
 };
 
-typedef struct node{
-    int x;
-    int y;
-} node;
-
 int *BFS(int src, int end, const vector<PQB> maze, int size){
     queue<int> path;
     path.push(src);
@@ -65,6 +60,8 @@ int *BFS(int src, int end, const vector<PQB> maze, int size){
 }
 
 int main(){
+    ios_base::sync_with_stdio(0);
+    cin.tie(0);
     vector<LQB> myLQB;
     vector<gate> mygate;
     vector<PQB> myPQB;
@@ -115,8 +112,6 @@ int main(){
         //can't do cnot, swap
         if(Isnei == 0){
                 //bfs(using gatemember)
-                int forwardB = myLQB[mygate[nowloop].gatemember[0]].PQBID;
-                int backwardB = myLQB[mygate[nowloop].gatemember[1]].PQBID;
                 int* result = BFS(forwardB, backwardB, myPQB, (phyQubits + 1));
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
