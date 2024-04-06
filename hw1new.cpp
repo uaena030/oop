@@ -7,7 +7,6 @@ int step;
 
 class PQB{
     public:
-    int LQBID;//initial mapping, will not changed
     vector<int> pneighbor;
 };
 
@@ -92,11 +91,10 @@ int main(){
     //baseline assume that logqubits equal to phyqubits
     for(int i = 1; i <= myPQB.size(); i++){
         myLQB[i].PQBID = i;
-        myPQB[i].LQBID = i;
     }
     //output initial map
     for(int i = 1; i < myPQB.size(); i++){
-        cout << i << " " << myPQB[i].LQBID << endl;
+        cout << i << " " << i << endl;
     }
     //precedence judge
     int nowloop = 1;
@@ -125,30 +123,33 @@ int main(){
                     coresult[copy] = result[copy];
                 }
                 //swap path point
-                int tempend = result[step - 1];
-                result[step - 1] = result[step - 2];
-                result[step - 2] = tempend;
-                //find who is now at coreresult[step - 1] and coreresult[step - 2]
-                int swA, swB;
-                for(int hard = 1; hard <= logQubits; hard++){
-                    int complete = -1;
-                    if(complete == 1){
-                        break;
+                while(step >= 3){
+                    int tempend = result[step - 1];
+                    result[step - 1] = result[step - 2];
+                    result[step - 2] = tempend;
+                    //find who is now at coreresult[step - 1] and coreresult[step - 2]
+                    int swA, swB;
+                    for(int hard = 1; hard <= logQubits; hard++){
+                        int complete = -1;
+                        if(complete == 1){
+                            break;
+                        }
+                        if(myLQB[hard].PQBID == coresult[step - 1]){
+                            swA = hard;
+                            complete++;
+                        }
+                        else if(myLQB[hard].PQBID == coresult[step - 2]){
+                            swB = hard;
+                            complete++;
+                        }
                     }
-                    if(myLQB[hard].PQBID == coresult[step - 1]){
-                        swA = hard;
-                        complete++;
-                    }
-                    else if(myLQB[hard].PQBID == coresult[step - 2]){
-                        swB = hard;
-                        complete++;
-                    }
+                    cout << "SWAP q" << swA << " q" << swB << endl;
+                    // remapping logical qubits
+                    int tempQB = myLQB[swA].PQBID;
+                    myLQB[swA].PQBID = myLQB[swB].PQBID;
+                    myLQB[swB].PQBID = tempQB;
+                    step--;
                 }
-                cout << "SWAP q" << swA << " q" << swB << endl;
-                // remapping logical qubits
-                int tempQB = myLQB[swA].PQBID;
-                myLQB[swA].PQBID = myLQB[swB].PQBID;
-                myLQB[swB].PQBID = tempQB;
         }
     }
 }
