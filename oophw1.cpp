@@ -90,7 +90,6 @@ int main(){
     vector<PQB> myPQB;
     int logQubits, gates, precedence, phyQubits, phyLinks;
     cin >> logQubits >> gates >> precedence >> phyQubits >> phyLinks;
-    int preIDlist[precedence + 2];
     myLQB.resize(logQubits + 1);
     mygate.resize(gates + 1);
     myPQB.resize(phyQubits + 1);
@@ -102,6 +101,7 @@ int main(){
         int current, next, trash;
         cin >> trash >> current >> next;
     }
+    //initialize link map
     int **clink = new int *[phyQubits + 1];
     for (int k = 0; k < phyQubits + 1; ++k){
         clink[k] = new int[phyQubits + 1];
@@ -132,8 +132,10 @@ int main(){
     int nowloop = 1;
     while(nowloop != gates + 1){
         int Isnei = 0;//bug here
-        for (int j = 0; j < myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor.size(); j++){//can do cnot
-                if (myLQB[myPQB[myLQB[mygate[nowloop].gatemember [0]].PQBID].pneighbor[j]].PQBID == mygate[nowloop].gatemember[1]){
+        int forwardB = myLQB[mygate[nowloop].gatemember [0]].PQBID;
+        int backwardB = myLQB[mygate[nowloop].gatemember[1]].PQBID;
+        for (int j = 0; j < myPQB[forwardB].pneighbor.size(); j++){//can do cnot
+                if (myPQB[forwardB].pneighbor[j] == backwardB){
                     Isnei = 1;
                     cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
                     nowloop++;
@@ -144,9 +146,7 @@ int main(){
         //can't do cnot, swap
         if(Isnei == 0){//assume now is gate4 (2, 3), nowloop is 4
                 //bfs(using pneighbor)
-                int initial = myLQB[mygate[nowloop].gatemember[0]].PQBID;
-                int end = myLQB[mygate[nowloop].gatemember[1]].PQBID;
-                int* result = BFS(initial, end, clink, (phyQubits + 1));//bug
+                int* result = BFS(forwardB, backwardB, clink, (phyQubits + 1));//bug
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
                     coresult[copy] = result[copy];
@@ -155,16 +155,15 @@ int main(){
                 int tempend = result[step - 1];
                 result[step - 1] = result[step - 2];
                 result[step - 2] = tempend;
-                cout << "SWAP q" << coresult[step - 2] << " q" << coresult[step - 1] << endl;
+                cout << "SWAP q" << myLQB[coresult[step - 2]].PQBID << " q" << myLQB[coresult[step - 1]].PQBID << endl;
                 // remapping logical qubits
-                int tempQB = myLQB[coresult[step - 1]].PQBID;
-                myLQB[coresult[step - 1]].PQBID = myLQB[coresult[step - 2]].PQBID;
-                myLQB[coresult[step - 2]].PQBID = tempQB;
+                //bug here
+                int swA = myLQB[coresult[step - 1]].PQBID;
+                int swB = myLQB[coresult[step - 2]].PQBID;
+                int tempQB = myLQB[swA].PQBID;
+                myLQB[swA].PQBID = myLQB[swB].PQBID;
+                myLQB[swB].PQBID = tempQB;
             //}
-            if(nowloop == gates){
-                cout << "CNOT q" << mygate[nowloop].gatemember[0] << " q" << mygate[nowloop].gatemember[1] << endl;
-                return 0;
-            }
         }
     }
 }
