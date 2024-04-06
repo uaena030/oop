@@ -1,0 +1,12 @@
+1 1
+2 2
+3 3
+4 4
+5 5
+CNOT q1 q4
+CNOT q1 q2
+SWAP q5 q3
+CNOT q1 q5
+SWAP q3 q4
+CNOT q2 q3
+CNOT q3 q4

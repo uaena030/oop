@@ -2,6 +2,7 @@
 #include <vector>
 #include <utility>
 #include <map>
+#include <queue>
 using namespace std;
 
 int step;
@@ -27,60 +28,41 @@ typedef struct node{
     int y;
 } node;
 
-int *BFS(int src, int end, int **maze, int size)
-{ // 1 0
-    node queue[size * size + 1];
-    int head = 0, tail = 1;
-    queue[0].x = src;
-    queue[0].y = src; //(src, src) is starting point
-    int node_x, node_y;
-    int visited[size], ancient[6000];
-    for (int i = 0; i < size; i++)
-    {
-        visited[i] = false;
-    }
+int *BFS(int src, int end, const vector<PQB> maze, int size){
+    queue<int> path;
+    path.push(src);
+    vector<bool> visited(size, false);
+    vector<int> ancient(size, -1);
     visited[src] = true;
     // bfs
-    while (head != tail)
-    {
-        node_x = queue[head].x;
-        node_y = queue[head].y;
-        if (node_x == end && node_y == end)
-        {
+    while (!path.empty()){
+        int node = path.front();
+        if (node == end){
             break;
         }
-        for (int i = 0; i < size; i++)
-        {
-            if (maze[node_y][i] == 1 && visited[i] == false){//bug appear
-                ancient[i] = node_y;
-                queue[tail].x = node_y; // 0 1
-                queue[tail].y = i;      // 1
+        for (int i : maze[node].pneighbor){
+            if (visited[i] == false){//bug appear
+                ancient[i] = node;
+                path.push(i);
                 visited[i] = true;
-                tail++;
             }
         }
-        head++;
     }
     // generate route
-    int rroute[6000];
-    for (int i = 0; i < 6000; i++)
-    {
-        rroute[i] = -1;
-    }
-    int i = end, j = 0;
+    vector<int> rroute;
+    int i = end;
     while (i != src)
     {
-        rroute[j] = i;
-        j++;
+        rroute.push_back(i);
         i = ancient[i];
     }
-    rroute[j] = i;
-    int *route = new int[6000];
-    for (int i = 0; i < j + 1; i++)
+    rroute.push_back(i);
+    int *route = new int[rroute.size()];
+    for (int i = 0; i < rroute.size(); i++)
     {
-        route[i] = rroute[j - i];
+        route[i] = rroute[rroute.size() - 1 - i];
     }
-    step = j + 1;
+    step = rroute.size();
     return route;
 }
 
@@ -147,7 +129,7 @@ int main(){
         //can't do cnot, swap
         if(Isnei == 0){
                 //bfs(using gatemember)
-                int* result = BFS(forwardB, backwardB, clink, (phyQubits + 1));
+                int* result = BFS(forwardB, backwardB, myPQB, (phyQubits + 1));
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
                     coresult[copy] = result[copy];
