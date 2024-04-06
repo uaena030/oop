@@ -1,7 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <utility>
-#include <map>
 #include <queue>
 using namespace std;
 
@@ -119,6 +117,8 @@ int main(){
         //can't do cnot, swap
         if(Isnei == 0){
                 //bfs(using gatemember)
+                int forwardB = myLQB[mygate[nowloop].gatemember[0]].PQBID;
+                int backwardB = myLQB[mygate[nowloop].gatemember[1]].PQBID;
                 int* result = BFS(forwardB, backwardB, myPQB, (phyQubits + 1));
                 int coresult[step];
                 for(int copy = 0; copy < step; copy++){
@@ -131,11 +131,17 @@ int main(){
                 //find who is now at coreresult[step - 1] and coreresult[step - 2]
                 int swA, swB;
                 for(int hard = 1; hard <= logQubits; hard++){
+                    int complete = -1;
+                    if(complete == 1){
+                        break;
+                    }
                     if(myLQB[hard].PQBID == coresult[step - 1]){
                         swA = hard;
+                        complete++;
                     }
                     else if(myLQB[hard].PQBID == coresult[step - 2]){
                         swB = hard;
+                        complete++;
                     }
                 }
                 cout << "SWAP q" << swA << " q" << swB << endl;
