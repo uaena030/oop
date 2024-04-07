@@ -91,7 +91,7 @@ int main(){
     }
     //output initial map
     for(int i = 1; i < myPQB.size(); i++){
-        cout << i << " " << i << '\n';
+        cout << i << " " << i << endl;
     }
     //precedence judge
     int nowloop = 1;
