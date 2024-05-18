@@ -1930,13 +1930,16 @@ void IoT_device::recv_handler (packet *p){
         IoT_ctrl_payload *l3 = nullptr;
         l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
         
+        if(getNodeID() != 0)
+            parent = p3->getHeader()->getPreID(); 
+        else
+            parent = 0;
         p3->getHeader()->setPreID ( getNodeID() );
         p3->getHeader()->setNexID ( BROADCAST_ID );
         p3->getHeader()->setDstID ( BROADCAST_ID );
         
         l3->increase();
 
-        //parent = 
         //children msg
 
         hi = true;
@@ -2011,55 +2014,7 @@ void IoT_device::recv_handler (packet *p){
 }
 
 void IoT_sink::recv_handler (packet *p){
-        // in this function, you are "not" allowed to use node::id_to_node(id) !!!!!!!!
 
-    // this is a simple example
-    // node 0 broadcasts its message to every node and every node relays the packet "only once" and increases its counter
-    // the variable hi is used to examine whether the packet has been received by this node before
-    // you can remove the variable hi and create your own routing table in class IoT_device
-    if (p == nullptr) return ;
-    
-    if (p->type() == "IoT_ctrl_packet" && !hi ) { // the device receives a packet from the sink
-        IoT_ctrl_packet *p3 = nullptr;
-        p3 = dynamic_cast<IoT_ctrl_packet*> (p);
-        IoT_ctrl_payload *l3 = nullptr;
-        l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
-        
-        p3->getHeader()->setPreID ( getNodeID() );
-        p3->getHeader()->setNexID ( BROADCAST_ID );
-        p3->getHeader()->setDstID ( BROADCAST_ID );
-        
-        l3->increase();
-
-        //parent = 
-        //children msg
-
-        hi = true;
-        //if ... else(send or not send)
-        send_handler(p3);
-        // unsigned mat = l3->getMatID();
-        // unsigned act = l3->getActID();
-        // string msg = l3->getMsg(); // get the msg
-    }
-    else if (p->type() == "IoT_data_packet" ) { // the device receives a packet
-        // cout << "node " << getNodeID() << " send the packet" << endl;
-    }
-    else if (p->type() == "AGG_ctrl_packet") {
-        AGG_ctrl_packet *p3 = nullptr;
-        p3 = dynamic_cast<AGG_ctrl_packet*> (p);
-        AGG_ctrl_payload *l3 = nullptr;
-        l3 = dynamic_cast<AGG_ctrl_payload*> (p3->getPayload());
-        
-        // cout << "node id = " << getNodeID() << ", msg = "  << l3->getMsg() << endl;
-    }
-    else if (p->type() == "DIS_ctrl_packet") {
-        DIS_ctrl_packet *p3 = nullptr;
-        p3 = dynamic_cast<DIS_ctrl_packet*> (p);
-        DIS_ctrl_payload *l3 = nullptr;
-        l3 = dynamic_cast<DIS_ctrl_payload*> (p3->getPayload());
-        
-        // cout << "node id = " << getNodeID() << ", parent = "  << l3->getParent() << endl;
-    }
 }
 
 int main()
@@ -2067,7 +2022,7 @@ int main()
     // header::header_generator::print(); // print all registered headers
     // payload::payload_generator::print(); // print all registered payloads
     // packet::packet_generator::print(); // print all registered packets
-    node::node_generator::print(); // print all registered nodes
+    // node::node_generator::print(); // print all registered nodes
     // event::event_generator::print(); // print all registered events
     // link::link_generator::print(); // print all registered links 
     
