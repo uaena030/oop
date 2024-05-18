@@ -842,7 +842,7 @@ class IoT_sink: public node {
             virtual node *generate(unsigned int _id) { /*cout << "IoT_device generated" << endl;*/ return new IoT_sink(_id); }
 
         public:
-            virtual string type() { return "IoT_device"; }
+            virtual string type() { return "IoT_sink"; }
             ~IoT_sink_generator() {}
         };
 };
@@ -1936,10 +1936,11 @@ void IoT_device::recv_handler (packet *p){
         
         l3->increase();
 
-        //parent =
+        //parent = 
         //children msg
 
         hi = true;
+        //if ... else(send or not send)
         send_handler(p3);
         // unsigned mat = l3->getMatID();
         // unsigned act = l3->getActID();
@@ -2009,14 +2010,64 @@ void IoT_device::recv_handler (packet *p){
     // note that packet p will be discarded (deleted) after recv_handler(); you don't need to manually delete it
 }
 
-void IoT_sink::recv_handler (packet *p){}
+void IoT_sink::recv_handler (packet *p){
+        // in this function, you are "not" allowed to use node::id_to_node(id) !!!!!!!!
+
+    // this is a simple example
+    // node 0 broadcasts its message to every node and every node relays the packet "only once" and increases its counter
+    // the variable hi is used to examine whether the packet has been received by this node before
+    // you can remove the variable hi and create your own routing table in class IoT_device
+    if (p == nullptr) return ;
+    
+    if (p->type() == "IoT_ctrl_packet" && !hi ) { // the device receives a packet from the sink
+        IoT_ctrl_packet *p3 = nullptr;
+        p3 = dynamic_cast<IoT_ctrl_packet*> (p);
+        IoT_ctrl_payload *l3 = nullptr;
+        l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
+        
+        p3->getHeader()->setPreID ( getNodeID() );
+        p3->getHeader()->setNexID ( BROADCAST_ID );
+        p3->getHeader()->setDstID ( BROADCAST_ID );
+        
+        l3->increase();
+
+        //parent = 
+        //children msg
+
+        hi = true;
+        //if ... else(send or not send)
+        send_handler(p3);
+        // unsigned mat = l3->getMatID();
+        // unsigned act = l3->getActID();
+        // string msg = l3->getMsg(); // get the msg
+    }
+    else if (p->type() == "IoT_data_packet" ) { // the device receives a packet
+        // cout << "node " << getNodeID() << " send the packet" << endl;
+    }
+    else if (p->type() == "AGG_ctrl_packet") {
+        AGG_ctrl_packet *p3 = nullptr;
+        p3 = dynamic_cast<AGG_ctrl_packet*> (p);
+        AGG_ctrl_payload *l3 = nullptr;
+        l3 = dynamic_cast<AGG_ctrl_payload*> (p3->getPayload());
+        
+        // cout << "node id = " << getNodeID() << ", msg = "  << l3->getMsg() << endl;
+    }
+    else if (p->type() == "DIS_ctrl_packet") {
+        DIS_ctrl_packet *p3 = nullptr;
+        p3 = dynamic_cast<DIS_ctrl_packet*> (p);
+        DIS_ctrl_payload *l3 = nullptr;
+        l3 = dynamic_cast<DIS_ctrl_payload*> (p3->getPayload());
+        
+        // cout << "node id = " << getNodeID() << ", parent = "  << l3->getParent() << endl;
+    }
+}
 
 int main()
 {
     // header::header_generator::print(); // print all registered headers
     // payload::payload_generator::print(); // print all registered payloads
     // packet::packet_generator::print(); // print all registered packets
-    //node::node_generator::print(); // print all registered nodes
+    node::node_generator::print(); // print all registered nodes
     // event::event_generator::print(); // print all registered events
     // link::link_generator::print(); // print all registered links 
     
@@ -2026,7 +2077,7 @@ int main()
     cin >> Nodes >> Links;
     cin >> SimTime >> BS_Time >> Data_Trans_Time;
     node::node_generator::generate("IoT_sink", 0);
-    for (unsigned int id = 0; id < Nodes; id++){
+    for (unsigned int id = 1; id < Nodes; id++){
         node::node_generator::generate("IoT_device",id);
     }
     
@@ -2055,13 +2106,15 @@ int main()
     
     
     // node 0 broadcasts a msg with counter 0 at time 100
-    IoT_ctrl_packet_event(0, BS_Time);
+    IoT_ctrl_packet_event(0, BS_Time, "Initailize_BFS_Error\n");
     // 1st parameter: the source; the destination that want to broadcast a msg with counter 0 (i.e., match ID)
     // 2nd parameter: time (optional)
     // 3rd parameter: msg for debug information (optional)
     
     // node 4 sends a packet to node 0 at time 200 --> you need to implement routing tables for IoT_devicees
-    IoT_data_packet_event(4, 0, Data_Trans_Time); // IoT_data_packet
+    for(int node_id = 1; node_id < Nodes; node_id++){
+        IoT_data_packet_event(node_id, 0, Data_Trans_Time, "Packet_Send_Error\n"); // IoT_data_packet
+    }
     // 1st parameter: the source node
     // 2nd parameter: the destination node (sink)
     // 3rd parameter: time (optional)
