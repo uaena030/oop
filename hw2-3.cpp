@@ -774,6 +774,7 @@ class IoT_device: public node {
 
         unsigned int parent;
         vector<unsigned int> children;
+        vector<bool> table;
 
     protected:
         IoT_device() {} // it should not be used
@@ -1929,15 +1930,18 @@ void IoT_device::recv_handler (packet *p){
         p3 = dynamic_cast<IoT_ctrl_packet*> (p);
         IoT_ctrl_payload *l3 = nullptr;
         l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
-        
-        if(getNodeID() != 0)
-            parent = p3->getHeader()->getPreID(); 
-        else
-            parent = 0;
+
+        parent = p3->getHeader()->getPreID(); 
+        /*else
+        if(getNodeID() == 0)
+            parent = 0;*///sink
         p3->getHeader()->setPreID ( getNodeID() );
         p3->getHeader()->setNexID ( BROADCAST_ID );
         p3->getHeader()->setDstID ( BROADCAST_ID );
-        
+
+
+        string msn = "My Parent is: " + parent;
+        l3->setMsg(msn);
         l3->increase();
 
         //children msg
@@ -1950,6 +1954,23 @@ void IoT_device::recv_handler (packet *p){
         // string msg = l3->getMsg(); // get the msg
     }
     else if (p->type() == "IoT_data_packet" ) { // the device receives a packet
+        IoT_ctrl_packet *p3 = nullptr;
+        p3 = dynamic_cast<IoT_ctrl_packet *>(p);
+        IoT_ctrl_payload *l3 = nullptr;
+        l3 = dynamic_cast<IoT_ctrl_payload *>(p3->getPayload());
+
+        p3->getHeader()->setPreID(getNodeID());
+        p3->getHeader()->setNexID(parent);
+        p3->getHeader()->setDstID(0);//set dst to sink
+
+        bool check = true;
+        for(int view:children){
+            if(children[view] == false)
+                check = false;
+        }
+        if(check){
+            send_handler(p3);
+        }
         // cout << "node " << getNodeID() << " send the packet" << endl;
     }
     else if (p->type() == "AGG_ctrl_packet") {
@@ -2022,7 +2043,7 @@ int main()
     // header::header_generator::print(); // print all registered headers
     // payload::payload_generator::print(); // print all registered payloads
     // packet::packet_generator::print(); // print all registered packets
-    // node::node_generator::print(); // print all registered nodes
+    node::node_generator::print(); // print all registered nodes
     // event::event_generator::print(); // print all registered events
     // link::link_generator::print(); // print all registered links 
     
