@@ -772,7 +772,7 @@ class IoT_device: public node {
         
         bool hi; // this is used for example; you can remove it when doing hw2
 
-        unsigned int parent;
+        unsigned int parent = -1;
         vector<unsigned int> children;
         vector<bool> table;
 
@@ -1931,7 +1931,16 @@ void IoT_device::recv_handler (packet *p){
         IoT_ctrl_payload *l3 = nullptr;
         l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
 
-        parent = p3->getHeader()->getPreID(); 
+        //judge smaller hop count
+        //judge smaller ID
+        if(parent == -1){
+            parent = p3->getHeader()->getPreID(); 
+        }
+        else{
+            if(parent > p3->getHeader()->getPreID()){
+                parent = p3->getHeader()->getPreID();
+            }
+        }
         /*else
         if(getNodeID() == 0)
             parent = 0;*///sink
@@ -1945,6 +1954,12 @@ void IoT_device::recv_handler (packet *p){
         l3->increase();
 
         //children msg
+        const map<unsigned int, bool> &nblist = getPhyNeighbors();
+        for (map<unsigned int,bool>::const_iterator it = nblist.begin(); it != nblist.end(); it++) {
+            if(it->first){
+                
+            }
+        }
 
         hi = true;
         //if ... else(send or not send)
