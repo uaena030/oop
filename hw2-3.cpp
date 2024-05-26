@@ -1949,15 +1949,16 @@ void IoT_device::recv_handler (packet *p){
         p3->getHeader()->setDstID ( BROADCAST_ID );
 
 
-        string msn = "My Parent is: " + parent;
-        l3->setMsg(msn);
+        //string msn = "My Parent is: " + getNodeID();
+        //l3->setMsg(msn);
         l3->increase();
 
         //children msg
         const map<unsigned int, bool> &nblist = getPhyNeighbors();
         for (map<unsigned int,bool>::const_iterator it = nblist.begin(); it != nblist.end(); it++) {
-            if(it->first){
-                
+            if(it->first != parent){
+                children.push_back(it->first);
+                table.push_back(false);
             }
         }
 
@@ -1980,7 +1981,7 @@ void IoT_device::recv_handler (packet *p){
 
         bool check = true;
         for(int view:children){
-            if(children[view] == false)
+            if(table[view] == false)
                 check = false;
         }
         if(check){
