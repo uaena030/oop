@@ -774,6 +774,7 @@ class IoT_device: public node {
 
         unsigned int parent = -1;
         vector<unsigned int> children;
+        unsigned int renew = 0;
         vector<bool> table;
 
     protected:
@@ -1931,14 +1932,24 @@ void IoT_device::recv_handler (packet *p){
         IoT_ctrl_payload *l3 = nullptr;
         l3 = dynamic_cast<IoT_ctrl_payload*> (p3->getPayload());
 
-        //judge smaller hop count
-        //judge smaller ID
-        if(parent == -1){
-            parent = p3->getHeader()->getPreID(); 
+        // judge smaller hop count
+        // judge smaller ID
+        const map<unsigned int,bool> &nblist = getPhyNeighbors();
+        bool whether = false;
+        for (map<unsigned int,bool>::const_iterator it = nblist.begin(); it != nblist.end(); it ++) {
+            if (it->first == p3->getHeader()->getPreID())// check whether PreID is neighbor
+                whether = true;
         }
-        else{
-            if(parent > p3->getHeader()->getPreID()){
+        if(whether){
+            if(parent == -1){// current node has no parent
                 parent = p3->getHeader()->getPreID();
+                renew++; 
+            }
+            else{//current node has parent
+                if(parent > p3->getHeader()->getPreID()){//replaced with small parent
+                    parent = p3->getHeader()->getPreID();
+                    renew++;
+                }
             }
         }
         /*else
@@ -1952,15 +1963,8 @@ void IoT_device::recv_handler (packet *p){
         //string msn = "My Parent is: " + getNodeID();
         //l3->setMsg(msn);
         l3->increase();
-
         //children msg
-        const map<unsigned int, bool> &nblist = getPhyNeighbors();
-        for (map<unsigned int,bool>::const_iterator it = nblist.begin(); it != nblist.end(); it++) {
-            if(it->first != parent){
-                children.push_back(it->first);
-                table.push_back(false);
-            }
-        }
+        
 
         hi = true;
         //if ... else(send or not send)
