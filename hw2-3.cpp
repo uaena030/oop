@@ -6,6 +6,7 @@
 #include <functional>
 #include <iomanip>
 #include <stack>
+#include <regex>
 
 
 using namespace std;
@@ -1952,22 +1953,39 @@ void IoT_device::recv_handler (packet *p){
                 }
             }
         }
+
+        //transfer string(the parent of PreID) to int
+        string child_Insert = l3->getMsg();
+        regex re("\\d+"); // 正則表達式，用於匹配一個或多個數字
+        int num;
+        smatch match;
+        if(regex_search(child_Insert, match, re)){
+            num = stoi(match.str());
+            //cout << "The number is: " << num << endl;
+        }
         /*else
-        if(getNodeID() == 0)
-            parent = 0;*///sink
+        {
+            cout << "No number found in the string." << std::endl;
+        }*/
+        
+        if(num == getNodeID()){//setting children
+            children.push_back(num);
+            table.push_back(false);
+        }
+        
         p3->getHeader()->setPreID ( getNodeID() );
         p3->getHeader()->setNexID ( BROADCAST_ID );
         p3->getHeader()->setDstID ( BROADCAST_ID );
 
 
-        //string msn = "My Parent is: " + getNodeID();
-        //l3->setMsg(msn);
+        string msn = "My Parent is " + parent;
+        l3->setMsg(msn);
         l3->increase();
         //children msg
         
 
         hi = true;
-        //if ... else(send or not send)
+        
         send_handler(p3);
         // unsigned mat = l3->getMatID();
         // unsigned act = l3->getActID();
@@ -1983,6 +2001,7 @@ void IoT_device::recv_handler (packet *p){
         p3->getHeader()->setNexID(parent);
         p3->getHeader()->setDstID(0);//set dst to sink
 
+        // if ... else(send or not send)
         bool check = true;
         for(int view:children){
             if(table[view] == false)
@@ -2055,7 +2074,10 @@ void IoT_device::recv_handler (packet *p){
 }
 
 void IoT_sink::recv_handler (packet *p){
-
+    /*else
+        if(getNodeID() == 0)
+            parent = 0;*/
+    // sink
 }
 
 int main()
