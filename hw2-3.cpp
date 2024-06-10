@@ -213,7 +213,8 @@ class payload {
         payload(payload&){} // this constructor cannot be directly called by users
         
         string msg;
-        
+        string how;
+
     protected:
         payload(){}
     public:
@@ -222,7 +223,9 @@ class payload {
         
         SET(setMsg,string,msg,_msg);
         GET(getMsg,string,msg);
-        
+        SET(sethow, string, how, _msg);
+        GET(gethow, string, how);
+
         class payload_generator {
                 // lock the copy constructor
                 payload_generator(payload_generator &){}
@@ -774,9 +777,8 @@ class IoT_device: public node {
         bool hi; // this is used for example; you can remove it when doing hw2
     public:
         unsigned int parent = -1;
-        vector<unsigned int> children;
+        map<unsigned int, bool> children;
         unsigned int renew = -1;
-        vector<bool> table;
 
     protected:
         IoT_device() {} // it should not be used
@@ -816,9 +818,9 @@ class IoT_sink: public node {
 
     public:
         unsigned int parent = -1;
-        vector<unsigned int> children;
+        map<unsigned int, bool> children;
         unsigned int renew = -1;
-        vector<bool> table;
+        
 
     protected:
         IoT_sink() {}              // it should not be used
@@ -1930,7 +1932,7 @@ void IoT_device::recv_handler (packet *p){
     // you can remove the variable hi and create your own routing table in class IoT_device
     if (p == nullptr) return ;
     
-    if (p->type() == "IoT_ctrl_packet" && !hi ) { // the device receives a packet from the sink
+    if (p->type() == "IoT_ctrl_packet" && !hi) { // the device receives a packet from the sink
         IoT_ctrl_packet *p3 = nullptr;
         p3 = dynamic_cast<IoT_ctrl_packet*> (p);
         IoT_ctrl_payload *l3 = nullptr;
@@ -1947,7 +1949,7 @@ void IoT_device::recv_handler (packet *p){
         if(whether){
             if(parent == -1){// current node has no parent
                 parent = p3->getHeader()->getPreID();
-                renew++; 
+                renew++;
             }
             else{//current node has parent
                 if(parent > p3->getHeader()->getPreID()){//replaced with small parent
@@ -1963,15 +1965,13 @@ void IoT_device::recv_handler (packet *p){
         
         if(num == getNodeID()){//setting children
             bool check = true;
-            for(int view:children){//check if child has been inserted
-                if (view == p3->getHeader()->getPreID()){
+            for(const auto& view : children){//check if child has been inserted
+                if (view.first == p3->getHeader()->getPreID()){
                     check = false;
                 }
             }
-            if(check){
-                children.push_back(p3->getHeader()->getPreID());
-                table.push_back(false);
-            }
+            if(check)
+                children[p3->getHeader()->getPreID()] = false;
         }
         
         p3->getHeader()->setPreID ( getNodeID() );
@@ -1980,12 +1980,13 @@ void IoT_device::recv_handler (packet *p){
 
 
         string msn = to_string(parent);
+        string count = to_string(renew);
         l3->setMsg(msn);
+        l3->sethow(count);
         l3->increase();
         //children msg
-        
-
         hi = true;
+
         
         send_handler(p3);
         // unsigned mat = l3->getMatID();
@@ -2005,15 +2006,15 @@ void IoT_device::recv_handler (packet *p){
             send_handler(p3);
         }
         else{
-            table[p3->getHeader()->getPreID()] = true;
+            children[p3->getHeader()->getPreID()] = true;
             p3->getHeader()->setPreID(getNodeID());
             p3->getHeader()->setNexID(parent);
             p3->getHeader()->setDstID(0);//set dst to sink
 
             // if ... else(send or not send)
             bool check = true;
-            for(int view:children){
-                if(table[view] == false)
+            for(const auto& view : children){
+                if(view.second == false)
                     check = false;
             }
             if(check){
@@ -2106,14 +2107,14 @@ void IoT_sink::recv_handler (packet *p){
             
             if(num == getNodeID()){//setting children
                 bool check = true;
-                for(int view:children){//check if child has been inserted
-                    if (view == p3->getHeader()->getPreID()){
+                for(const auto& view : children){//check if child has been inserted
+                    if (view.first == p3->getHeader()->getPreID()){
                         check = false;
                     }
                 }
+
                 if(check){
-                    children.push_back(p3->getHeader()->getPreID());
-                    table.push_back(false);
+                    children[p3->getHeader()->getPreID()] = false;
                 }
             }
         }
@@ -2143,21 +2144,21 @@ void IoT_sink::recv_handler (packet *p){
         l3 = dynamic_cast<IoT_data_payload *>(p3->getPayload());
         bool done = true;
 
-        for(int view:children){
-            if(table[view] == false){//not done
+        for(const auto & view:children){
+            if(view.second == false){//not done
                 done = false;
             }
         }
         if(done == false){
-            table[p3->getHeader()->getPreID()] = true;
+            children[p3->getHeader()->getPreID()] = true;
             p3->getHeader()->setPreID(getNodeID());
             p3->getHeader()->setNexID(parent);
             p3->getHeader()->setDstID(0);//set dst to sink
 
             // if ... else(send or not send)
             bool check = true;
-            for(int view:children){
-                if(table[view] == false)//not done
+            for(const auto& view:children){
+                if(view.second == false)//not done
                     check = false;
             }
             if(check){
@@ -2267,6 +2268,12 @@ int main()
         IoT_device *device = dynamic_cast<IoT_device *>(now);
         cout << p << ' ' << device->parent << '\n';
     }
+    /*for (int p = 1; p < Nodes; p++){
+        node *now = node::id_to_node(p);
+        IoT_device *device = dynamic_cast<IoT_device *>(now);
+        cout << p << " child: " << '\n';
+        cout << device->children.size() << '\n';
+    }*/
     // event::flush_events() ;
     // cout << packet::getLivePacketNum() << endl;
     return 0;
